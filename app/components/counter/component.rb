@@ -1,4 +1,5 @@
-class Counter::Component < ViewComponent
+# мб рядом положить Counter::View? где какие-то параметры самой вьюхи менеджить?
+class Counter::Component < AppComponent #ViewComponent
   # or def initialize(count: 0) ?
   def initialize(params)
     @count = pararms[:count] || 0
@@ -10,6 +11,25 @@ class Counter::Component < ViewComponent
 
   def render
     # some options before render?
+  end
+
+  # в статье написать про исходные данные - один разраб, создание в основном админок
+  # но с разным функционалом
+
+  # TODO: валидации(просто рисуем? но тоже какой-то общий компонент бы мб)
+  # Вообще нужен какой-то лучший пример, вот тут форма класснее
+  # https://www.saaspegasus.com/guides/modern-javascript-for-django-developers/htmx-alpine/
+  # Counter слишком простой
+
+  # Автодополнение серверное мб? Типо search. Тоже генерить апи.
+  # как будто не проблема?
+  def search
+    # результаты. список options, если надо
+    # Но что это за компонент? Или весь html формы перекидывать?
+    # Selection не спадёт вообще? А какой selection когда мы в инпуте печатаем?
+
+    # но если нужна будет вторая апиха -
+    # то придется что-то дублировать(или в сервисы выносить)
   end
 
   def component_context
@@ -50,13 +70,18 @@ class Counter::Component < ViewComponent
     # from evil martians view_components-contrib
   end
 
+  def component_name
+    # весь неймспейс до ::Component
+    'counter'
+  end
+
   def reflex(method)
     params = {} # all curren instance variables?
     url = component_url(Counter::Component, :increment, params)
     # CHECK: will hx rewrite these attributes, if I'll duplicate them?
     # (if I want to change them)
     # (or we can make them as parameters, ofcourse)
-   "hx-post='#{url}' hx-trigger='click'
+   "hx-post='#{url}' hx-trigger='click' hx-ext='json-enc'
     hx-target='#{container_class}' hx-swap='outerHTML'"
   end
 
