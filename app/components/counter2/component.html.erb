@@ -1,0 +1,15 @@
+<!-- https://www.saaspegasus.com/guides/modern-javascript-for-django-developers/htmx-alpine/ -->
+
+<%= component_controller do %>
+<div>
+    <p><%= @count %></p>
+    <%= reflex_tag :increment, :button, "Click" %>
+    <button hx-post="Counter::Component->increment"
+            hx-trigger="click"
+            hx-target="#parent-div"
+            hx-swap="outerHTML"
+            >
+      Click Me!
+    </button>
+</div>
+<% end %>

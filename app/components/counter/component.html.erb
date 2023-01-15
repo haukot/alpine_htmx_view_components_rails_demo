@@ -1,0 +1,25 @@
+<!-- https://www.saaspegasus.com/guides/modern-javascript-for-django-developers/htmx-alpine/ -->
+<!-- https://github.com/joshleblanc/view_component_reflex -->
+<!-- https://github.com/palkan/view_component-contrib -->
+
+<script>
+  component_params = <%= component_context.to_json %>
+</script>
+
+<script>
+  // https://htmx.org/events/#htmx:configRequest
+  document.body.addEventListener('htmx:configRequest', function(evt) {
+    // evt.detail.parameters['auth_token'] = getAuthToken(); // add a new parameter into the mix
+    evt.detail.parameters = component_params
+  });
+</script>
+
+
+<div class="#{container_class}">
+    <p><%= @count %></p>
+    <%= reflex_tag :increment, :button, "Click" %>
+
+    <button <%= reflex(:increment) %> hx-something=''> Click </button>
+    <!-- can I do like that? maybe with js?.. -->
+    <button hx-reflex="increment"> Click </button>
+</div>
