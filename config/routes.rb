@@ -3,4 +3,7 @@ Rails.application.routes.draw do
 
   # Defines the root path route ("/")
   # root "articles#index"
+
+  # TODO: how to move this to a gem?
+  post '/components/:component', to: 'components#component'
 end

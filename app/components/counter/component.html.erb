@@ -1,52 +1,15 @@
 <!-- https://www.saaspegasus.com/guides/modern-javascript-for-django-developers/htmx-alpine/ -->
-<!-- https://github.com/joshleblanc/view_component_reflex -->
-<!-- https://github.com/palkan/view_component-contrib -->
 
-<script>
-  <%= component_name %>_component_params = <%= component_context.to_json %>
-</script>
-
-<script>
-  // TODO: can be with https://htmx.org/extensions/include-vals/
-
-  // https://htmx.org/events/#htmx:configRequest
-  document.body.addEventListener('htmx:configRequest', function(evt) {
-    // if (evt.detail.parameters['reflex'])
-
-    // evt.detail.parameters['auth_token'] = getAuthToken(); // add a new parameter into the mix
-    evt.detail.parameters = component_params
-  });
-  document.body.addEventListener('htmx:beforeProcessNode', function(evt) {
-    //  check hx-reflex
-    // if exist - add <%= reflex(:method) => - all hx-post, hx-target, etc.
-    // but only those, which don't exist on the element already
-  })
-</script>
-
-
-<!-- и это будет базово наследоваться(https://htmx.org/docs/#inheritance)?
- но increment как добавить? -->
-<div class="#{container_class}" hx-post='#{url}'
-     hx-target='#{container_class}' hx-swap='outerHTML'>
+<%= component_controller do %>
+<div>
     <p><%= @count %></p>
-    <button hx-trigger='click' hx-SOMETHING?='increment'> Click </button>
-</div>
-
-
-<div class="#{container_class}">
     <%= reflex_tag :increment, :button, "Click" %>
-    <button <%= reflex(:increment) %> hx-something=''> Click </button>
-
-    <!-- can I do like that? maybe with js?.. but it should be before htmx -->
-    <!-- or some-reflex='increment'. - только тут мне тоже надо за дом
-         деревом следить, и вовремя переставлять аттрибуты -->
-    <!-- ну ещё можно extension написать, но не уверен что норм будет работать,
-         и не придется всё руками реализовывать -->
-    <!-- вроде с htmx:beforeProcessNode можно что-то придумать - эвент до обработки всех --
-      -- аттрибутов -->>
-    <!-- но как получается, что этот атрибут он уже обработал, а другие нет?.. -->
-    <!-- хотя можно на document.body.addEventListener добавить наверно? -->
-    <button hx-reflex="increment"> Click </button>
-    <!-- or (если хочу другой компонент триггернуть? Но мб лучше это в беке оставить пока) -->
-    <button hx-reflex="Counter::increment"> Click </button>
+    <button hx-post="Counter::Component->increment"
+            hx-trigger="click"
+            hx-target="#parent-div"
+            hx-swap="outerHTML"
+            >
+      Click Me!
+    </button>
 </div>
+<% end %>

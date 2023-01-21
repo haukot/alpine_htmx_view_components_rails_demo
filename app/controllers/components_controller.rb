@@ -3,12 +3,15 @@ class ComponentsController < ApplicationController
   def component
     # check auth?.. by user_id?
 
-    # component = 'Counter::Component'.constantize
-    component = params.extract(:component).constantize
-    method = params.extract(:method) # :increment
+    # TODO: это на самом деле не AppComponent, а какой-то другой сервис
+    component = AppComponent.detect(params.delete(:component))
+    method = params.delete(:method) # :increment
 
-    # check component - is ViewComponent, and user have access to it
+    # TODO: check user have access to component and method
     # to prevent arbitrary code run
+    unless component.public_methods.include?(method)
+      raise "Method not found #{method} #{component}"
+    end
 
     # приватные параметры не будут отображаться
     # методов с параметрами не будет? или что-то ещё отправлять
