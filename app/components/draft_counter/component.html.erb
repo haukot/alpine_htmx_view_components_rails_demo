@@ -13,7 +13,7 @@
   document.body.addEventListener('htmx:configRequest', function(evt) {
     // if (evt.detail.parameters['reflex'])
     // evt.detail.parameters['auth_token'] = getAuthToken(); // add a new parameter into the mix
-    evt.detail.parameters = <%= component_params.to_json %>
+    evt.detail.parameters = <%= component_context.to_json %>
   });
   document.body.addEventListener('htmx:beforeProcessNode', function(evt) {
     //  check hx-reflex

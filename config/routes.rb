@@ -6,4 +6,6 @@ Rails.application.routes.draw do
 
   # TODO: how to move this to a gem?
   post '/components/:component', to: 'components#component'
+
+  resources :home, only: [:index]
 end

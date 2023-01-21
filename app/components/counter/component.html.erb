@@ -1,15 +1,26 @@
-<!-- https://www.saaspegasus.com/guides/modern-javascript-for-django-developers/htmx-alpine/ -->
+<!-- TODO: include as file? or yarn.lock, etc -->
+<script src="https://unpkg.com/htmx.org@1.8.5" integrity="sha384-7aHh9lqPYGYZ7sTHvzP1t3BAfLhYSTy9ArHdP3Xsr9/3TlGurYgcPBoFmXX2TX/w" crossorigin="anonymous"></script>
 
-<%= component_controller do %>
-<div>
+<script>
+  // TODO: can be with https://htmx.org/extensions/include-vals/
+
+  // https://htmx.org/events/#htmx:configRequest
+  document.body.addEventListener('htmx:configRequest', function(evt) {
+    // if (evt.detail.parameters['reflex'])
+    // evt.detail.parameters['auth_token'] = getAuthToken(); // add a new parameter into the mix
+    evt.detail.parameters = <%= component_context.to_json %>
+  });
+  document.body.addEventListener('htmx:beforeProcessNode', function(evt) {
+    //  check hx-reflex
+    // if exist - add <%= reflex(:method) => - all hx-post, hx-target, etc.
+    // but only those, which don't exist on the element already
+  })
+</script>
+
+<div class="#{component_css_class}">
     <p><%= @count %></p>
-    <%= reflex_tag :increment, :button, "Click" %>
-    <button hx-post="Counter::Component->increment"
-            hx-trigger="click"
-            hx-target="#parent-div"
-            hx-swap="outerHTML"
-            >
-      Click Me!
-    </button>
+
+    <button hx-reflex="increment"> Click </button>
+    <!-- or (если хочу другой компонент триггернуть? Но мб лучше это в беке оставить пока) -->
+    <button hx-reflex="Counter::increment"> Click with component </button>
 </div>
-<% end %>

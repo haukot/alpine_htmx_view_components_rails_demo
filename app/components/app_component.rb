@@ -36,6 +36,8 @@ class AppComponent < ViewComponent::Base
     "/components/#{self.component_name}?method=#{method}"
   end
 
+  # TODO: надо ещё какой-то key добавить, на случай если выводят список
+  # Или мб это внутри компонента в этом случае будет писаться
   def component_css_class
     "component-#{self.component_name}"
   end
