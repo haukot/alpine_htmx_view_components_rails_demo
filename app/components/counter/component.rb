@@ -1,5 +1,8 @@
 class Counter::Component < AppComponent
-  # должен совпадать с параметром в initialize, и с instance_variable
+  # TODO: опциональные валидации на параметры? И будет ближе к grape
+  # но это уже не зона ответственности ViewComponent'a - но поэтому у нас и
+  # AppComponent!
+  # Но раз у нас AppComponent, то мб и рендер ViewComponent'ов в него вынести?
   component_attributes :count
 
   def initialize(params)
