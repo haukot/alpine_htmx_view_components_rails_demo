@@ -1,6 +1,7 @@
 class AppComponent < ViewComponent::Base
   attr_reader :component_params
 
+  # должны совпадать с параметром в initialize, и с instance_variable
   def self.component_attributes(*attributes)
     @@component_attributes = attributes
     attr_accessor(*attributes)

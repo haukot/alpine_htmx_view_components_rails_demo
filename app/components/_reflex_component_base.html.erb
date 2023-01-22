@@ -1,4 +1,6 @@
 <div hx-ext='reflex' hx-reflex-component="<%= component.component_name %>" class="<%= component.component_css_class %>">
+  <!-- сделать опциональное хранение в сессии? но в сессии хуже, она же про
+       все компоненты сразу отсылаться будет -->
   <script>
     window["<%= component.component_name %>_component_params"] = <%= component.component_context.to_json.html_safe %>
   </script>
