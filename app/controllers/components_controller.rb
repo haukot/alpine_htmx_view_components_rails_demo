@@ -18,6 +18,8 @@ class ComponentsController < ApplicationController
     component = component_class.new(params)
     component.send(method)
 
+    # TODO: надо ещё часть лейаут от AppComponent тут не рендерить - скрипты
+    # не нужно второй раз отправлять
     render component, content_type: "text/html", layout: false
   end
 end

@@ -27,17 +27,22 @@ class AppComponent < ViewComponent::Base
     self.name.gsub("::Component", "").underscore.dasherize.gsub("/", "-")
   end
 
-  def component_name
-    self.class.component_name
-  end
-
   def self.component_url
     # TODO: use rails routes helpers?
     "/components/#{self.component_name}"
   end
 
+  # TODO: это хелпер
+  def self.render_with_htmx(component)
+    render_inline(component, layout: 'with_htmx_state')
+  end
+
   def initialize(params)
     #@component_params = params
+  end
+
+  def component_name
+    self.class.component_name
   end
 
   def component_context
@@ -62,12 +67,14 @@ class AppComponent < ViewComponent::Base
     "component-#{self.class.component_name}"
   end
 
-  def reflex(method)
-    params = @params # all curren instance variables?
-    # CHECK: will hx rewrite these attributes, if I'll duplicate them?
-    # (if I want to change them)
-    # (or we can make them as parameters, ofcourse)
-   "hx-post='#{self.class.component_url}' hx-trigger='click' hx-ext='json-enc'
-    hx-target='#{component_css_class}' hx-swap='outerHTML'"
+  def component_without_layout
+    render(self) do
+
+    end
+  end
+
+  def control_htmx
+    render
+
   end
 end

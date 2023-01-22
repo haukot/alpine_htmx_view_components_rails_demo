@@ -64,18 +64,8 @@
     });
 </script>
 
-<div hx-ext='reflex' hx-reflex-component="<%= component_name %>" class="<%= component_css_class %>">
-  <script>
-    window["<%= component_name %>_component_params"] = <%= component_context.to_json.html_safe %>
-  </script>
-
-  <p><%= @count %></p>
-
-  <button hx-reflex="increment"> Click </button>
-  <!-- or (если хочу другой компонент триггернуть? Но мб лучше это в беке оставить пока) -->
-  <!-- но в него отправятся параметры текущего компонента. Тут поидее нужны параметры -->
-  <!-- ещё для hx-target добавить возможность замены верхнего компонента? -->
-  <!-- или расшаренный класс Counter::Component.component_css_class(или
-       reflex_css_class?) -->
-  <button hx-reflex="Counter::increment"> Click with component </button>
-</div>
+<%= render "/reflex_component_base" do %>
+  <div hx-ext='reflex' hx-reflex-component="<%= component_name %>" class="<%= component_css_class %>">
+    <%= yield %>
+  </div>
+<% end %>
