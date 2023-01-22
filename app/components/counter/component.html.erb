@@ -1,26 +1,75 @@
 <!-- TODO: include as file? or yarn.lock, etc -->
 <script src="https://unpkg.com/htmx.org@1.8.5" integrity="sha384-7aHh9lqPYGYZ7sTHvzP1t3BAfLhYSTy9ArHdP3Xsr9/3TlGurYgcPBoFmXX2TX/w" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/htmx.org@1.8.5/dist/ext/include-vals.js" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/htmx.org@1.8.5/dist/ext/json-enc.js" crossorigin="anonymous"></script>
 
 <script>
+  // document.addEventListener("DOMContentLoaded", function(event) {
+  // })
+  function processReflexElement(elt) {
+    if (elt.getAttribute) {
+      let reflexMethod = elt.getAttribute("hx-reflex") || elt.getAttribute("data-hx-reflex");
+      if (reflexMethod) {
+        elt.removeAttribute("hx-reflex");
+        elt.removeAttribute("data-hx-reflex");
+
+        elt.setAttribute("hx-post", "<%= self.class.component_url %>");
+        elt.setAttribute("hx-trigger", "click");
+        elt.setAttribute("hx-target", ".<%= component_css_class %>");
+        elt.setAttribute("hx-swap", "outerHTML");
+        // TODO: но получается у нас нет наследования тегов сверху?..
+        elt.setAttribute("hx-ext", "json-enc, include-vals");
+        elt.setAttribute("include-vals", `component_method:"${reflexMethod}"`);
+
+        // TODO: maybe can work without this?
+        htmx.process(elt);
+      }
+    }
+  }
+
+  htmx.defineExtension('reflex', {
+    onEvent: function(name, evt) {
+      console.log("Fired event: " + name, evt);
+      if (name === "htmx:beforeProcessNode") {
+        var elt = evt.detail.elt;
+        processReflexElement(elt);
+        if (elt.querySelectorAll) {
+          var children = elt.querySelectorAll("[hx-reflex]");
+          for (var i = 0; i < children.length; i++) {
+            processReflexElement(children[i]);
+          }
+        }
+      }
+      // TODO: configRequest here?
+    }
+  })
+  // // post request with rails csrf token
+  // htmx.defineExtension('csrf', {
+  //   configRequest: function (elt, request) {
+  //     request.headers['X-CSRF-Token'] = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+  //   }
+  // })
+
+
   // TODO: can be with https://htmx.org/extensions/include-vals/
 
   // https://htmx.org/events/#htmx:configRequest
-  document.body.addEventListener('htmx:configRequest', function(evt) {
-    // if (evt.detail.parameters['reflex'])
-    // evt.detail.parameters['auth_token'] = getAuthToken(); // add a new parameter into the mix
-    evt.detail.parameters = <%= component_context.to_json %>
-  });
-  document.body.addEventListener('htmx:beforeProcessNode', function(evt) {
-    //  check hx-reflex
-    // if exist - add <%= reflex(:method) => - all hx-post, hx-target, etc.
-    // but only those, which don't exist on the element already
-  })
+    document.body.addEventListener('htmx:configRequest', function(evt) {
+      // if (evt.detail.parameters['reflex'])
+      // evt.detail.parameters['auth_token'] = getAuthToken(); // add a new parameter into the mix
+      evt.detail.parameters = <%= component_name %>_component_params;
+      evt.detail.headers['X-CSRF-Token'] = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+    });
 </script>
 
-<div class="#{component_css_class}">
-    <p><%= @count %></p>
+<div hx-ext='reflex' hx-ext="include-vals" class="<%= component_css_class %>">
+  <script>
+    var <%= component_name %>_component_params = <%= component_context.to_json.html_safe %>
+  </script>
 
-    <button hx-reflex="increment"> Click </button>
-    <!-- or (если хочу другой компонент триггернуть? Но мб лучше это в беке оставить пока) -->
-    <button hx-reflex="Counter::increment"> Click with component </button>
+  <p><%= @count %></p>
+
+  <button hx-reflex="increment"> Click </button>
+  <!-- or (если хочу другой компонент триггернуть? Но мб лучше это в беке оставить пока) -->
+  <button hx-reflex="Counter::increment"> Click with component </button>
 </div>

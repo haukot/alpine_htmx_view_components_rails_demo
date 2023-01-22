@@ -1,6 +1,17 @@
 class AppComponent < ViewComponent::Base
   attr_reader :component_params
 
+  def self.component_attributes(*attributes)
+    @@component_attributes = attributes
+    attr_accessor(*attributes)
+  end
+
+  def self.component_attribute(attribute)
+    @@component_attributes ||= []
+    @@component_attributes << attribute
+    attr_accessor(attribute)
+  end
+
   def self.detect(component_name)
     component = (component_name.gsub("-", "/").camelize + "::Component").constantize
     unless component.ancestors.include?(AppComponent)
@@ -16,30 +27,39 @@ class AppComponent < ViewComponent::Base
     self.name.gsub("::Component", "").underscore.dasherize.gsub("/", "-")
   end
 
+  def component_name
+    self.class.component_name
+  end
+
+  def self.component_url
+    # TODO: use rails routes helpers?
+    "/components/#{self.component_name}"
+  end
+
   def initialize(params)
-    @component_params = params
+    #@component_params = params
   end
 
   def component_context
-    # TODO: we don't need instance variables?
-    # self.instance_variables.map do |attribute|
-    #   { attribute => self.instance_variable_get(attribute) }
+    # TODO: приватные переменные не очень хотелось бы выдавать? тут и классы могут
+    # быть всякие, и на вход то мы только параметры принимаем!
+    # т.е. instance_variable должен названием совпадать с параметром
+    puts "HUI #{@@component_attributes}"
+    @@component_attributes.each_with_object({}) do |attr, h|
+      h[attr] = instance_variable_get("@#{attr}")
+    end
+    # self.instance_variables.each_with_object({}) do |attribute, hash|
+    #   hash[attribute] = self.instance_variable_get(attribute)
     # end
 
-    component_params
-  end
-
-  def component_url(method)
-    # TODO: use rails routes helpers?
-    # TODO: a bit bad that we're using GET and POST params at the same time
-    # maybe move it to hx-something
-    "/components/#{self.component_name}?method=#{method}"
+    # параметры не меняеются после вызова метода - а нам надо выдавать обновленное
+    # component_params
   end
 
   # TODO: надо ещё какой-то key добавить, на случай если выводят список
   # Или мб это внутри компонента в этом случае будет писаться
   def component_css_class
-    "component-#{self.component_name}"
+    "component-#{self.class.component_name}"
   end
 
   def reflex(method)
@@ -47,7 +67,7 @@ class AppComponent < ViewComponent::Base
     # CHECK: will hx rewrite these attributes, if I'll duplicate them?
     # (if I want to change them)
     # (or we can make them as parameters, ofcourse)
-   "hx-post='#{self.component_url}' hx-trigger='click' hx-ext='json-enc'
+   "hx-post='#{self.class.component_url}' hx-trigger='click' hx-ext='json-enc'
     hx-target='#{component_css_class}' hx-swap='outerHTML'"
   end
 end
