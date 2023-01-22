@@ -8,6 +8,80 @@
 
     <!-- <%= stylesheet_link_tag "application", "data-turbo-track": "reload" %> -->
     <!-- <%= javascript_importmap_tags %> -->
+    <!-- TODO: include as file? or yarn.lock, etc -->
+    <script src="https://unpkg.com/htmx.org@1.8.5" integrity="sha384-7aHh9lqPYGYZ7sTHvzP1t3BAfLhYSTy9ArHdP3Xsr9/3TlGurYgcPBoFmXX2TX/w" crossorigin="anonymous"></script>
+    <script src="https://unpkg.com/htmx.org@1.8.5/dist/ext/include-vals.js" crossorigin="anonymous"></script>
+    <script src="https://unpkg.com/htmx.org@1.8.5/dist/ext/json-enc.js" crossorigin="anonymous"></script>
+
+    <script>
+      // TODO: load after htmx loaded
+      // document.addEventListener("DOMContentLoaded", function(event) {
+      // })
+      function processReflexElement(elt) {
+        if (elt.getAttribute) {
+          let reflexMethod = elt.getAttribute("hx-reflex") || elt.getAttribute("data-hx-reflex");
+          if (reflexMethod) {
+            elt.removeAttribute("hx-reflex");
+            elt.removeAttribute("data-hx-reflex");
+
+            // TODO: можно все это в аттрибуты парента(контейнера) перенести
+            let componentName = elt.closest('[hx-reflex-component]').getAttribute('hx-reflex-component');
+            let componentUrl = window[`${componentName}_component_params`]['component_url'];
+            let componetCssClass = window[`${componentName}_component_params`]['component_css_class'];
+
+            elt.setAttribute("hx-post", componentUrl);
+            elt.setAttribute("hx-trigger", "click");
+            elt.setAttribute("hx-target", `.${componetCssClass}`);
+            elt.setAttribute("hx-swap", "outerHTML");
+            // потому что у нас hx-ext='reflex' определн, и экстеншены
+            // ищутся только на один уровень(на parentElement).
+            // что будто бы странно?
+            elt.setAttribute("hx-ext", "json-enc, include-vals");
+            elt.setAttribute("include-vals", `component_method:"${reflexMethod}"`);
+
+            // TODO: maybe can work without this?
+            htmx.process(elt);
+          }
+        }
+      }
+
+      htmx.defineExtension('reflex', {
+        onEvent: function(name, evt) {
+          console.log("Fired event: " + name, evt);
+          if (name === "htmx:beforeProcessNode") {
+            var elt = evt.detail.elt;
+            processReflexElement(elt);
+            if (elt.querySelectorAll) {
+              var children = elt.querySelectorAll("[hx-reflex], [data-hx-reflex]");
+              for (var i = 0; i < children.length; i++) {
+                processReflexElement(children[i]);
+              }
+            }
+          }
+          // TODO: configRequest here?
+        }
+      })
+      // // post request with rails csrf token
+      // htmx.defineExtension('csrf', {
+      //   configRequest: function (elt, request) {
+      //     request.headers['X-CSRF-Token'] = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+      //   }
+      // })
+
+      document.addEventListener('htmx:configRequest', function(evt) {
+        // if (evt.detail.parameters['reflex'])
+        // evt.detail.parameters['auth_token'] = getAuthToken(); // add a new parameter into the mix
+
+        // get parent from evt.target
+
+        var componentName = evt.target.closest('[hx-reflex-component]').getAttribute('hx-reflex-component');
+        // TODO: store uuid for all components? and make id with that uuid?
+        // so we will change the right component if there are same components
+        evt.detail.parameters = window[`${componentName}_component_params`];
+        evt.detail.headers['X-CSRF-Token'] = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+      });
+    </script>
+
   </head>
 
   <body>

@@ -49,16 +49,22 @@ class AppComponent < ViewComponent::Base
     # TODO: приватные переменные не очень хотелось бы выдавать? тут и классы могут
     # быть всякие, и на вход то мы только параметры принимаем!
     # т.е. instance_variable должен названием совпадать с параметром
-    puts "HUI #{@@component_attributes}"
-    @@component_attributes.each_with_object({}) do |attr, h|
-      h[attr] = instance_variable_get("@#{attr}")
-    end
+
     # self.instance_variables.each_with_object({}) do |attribute, hash|
     #   hash[attribute] = self.instance_variable_get(attribute)
     # end
 
     # параметры не меняеются после вызова метода - а нам надо выдавать обновленное
     # component_params
+
+    puts "HUI #{@@component_attributes}"
+    res = @@component_attributes.each_with_object({}) do |attr, h|
+      h[attr] = instance_variable_get("@#{attr}")
+    end
+    res['component_url'] = self.class.component_url
+    res['component_css_class'] = component_css_class
+
+    res
   end
 
   # TODO: надо ещё какой-то key добавить, на случай если выводят список
@@ -67,14 +73,9 @@ class AppComponent < ViewComponent::Base
     "component-#{self.class.component_name}"
   end
 
-  def component_without_layout
-    render(self) do
-
-    end
-  end
-
-  def control_htmx
-    render
-
+  def use_htmx_reflex
+    render "/reflex_component_base", component: self, captured: capture {
+      yield
+    }
   end
 end

@@ -1,0 +1,7 @@
+<div hx-ext='reflex' hx-reflex-component="<%= component.component_name %>" class="<%= component.component_css_class %>">
+  <script>
+    window["<%= component.component_name %>_component_params"] = <%= component.component_context.to_json.html_safe %>
+  </script>
+  <!-- TODO: yield почему-то два раза рендерил -->
+  <%= captured %>
+</div>
