@@ -29,15 +29,26 @@
             let componentUrl = window[`${componentName}_component_params`]['component_url'];
             let componetCssClass = window[`${componentName}_component_params`]['component_css_class'];
 
-            elt.setAttribute("hx-post", componentUrl);
-            elt.setAttribute("hx-trigger", "click");
-            elt.setAttribute("hx-target", `.${componetCssClass}`);
-            elt.setAttribute("hx-swap", "outerHTML");
+            // dont set if elt already has attribute
+            if (!elt.getAttribute('hx-post')) {
+                  elt.setAttribute("hx-post", componentUrl);
+            }
+            if (!elt.getAttribute('hx-target')) {
+                  elt.setAttribute("hx-target", `.${componetCssClass}`);
+            }
+            if (!elt.getAttribute('hx-swap')) {
+                  elt.setAttribute("hx-swap", "outerHTML");
+            }
             // потому что у нас hx-ext='reflex' определн, и экстеншены
             // ищутся только на один уровень(на parentElement).
             // что будто бы странно?
-            elt.setAttribute("hx-ext", "json-enc, include-vals");
-            elt.setAttribute("include-vals", `component_method:"${reflexMethod}"`);
+            let extensions = elt.getAttribute('hx-ext') || "";
+            if (extensions) extensions = `, ${extensions}`;
+            elt.setAttribute("hx-ext", `json-enc, include-vals ${extensions}`);
+
+            let includeVals = elt.getAttribute('include-vals') || "";
+            if (includeVals) includeVals = `, ${includeVals}`;
+            elt.setAttribute("include-vals", `component_method:"${reflexMethod}" ${includeVals}`);
 
             // TODO: maybe can work without this?
             htmx.process(elt);
